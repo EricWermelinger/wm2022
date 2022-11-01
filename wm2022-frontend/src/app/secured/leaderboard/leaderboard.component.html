@@ -1,0 +1,7 @@
+<div *ngIf="leaderboard$ | async as leaderboard">
+    <mat-card *ngFor="let player of leaderboard" class="leaderboard">
+        <div class="right-align">{{ player.position }}.</div>
+        <div>{{ player.username }}</div>
+        <div class="right-align">{{ player.points }}</div>
+    </mat-card>
+</div>

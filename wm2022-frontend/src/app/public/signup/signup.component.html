@@ -1,0 +1,14 @@
+<h1>WM Tippspiel 2022 - Registrieren</h1>
+<form [formGroup]="form" class="one-row">
+    <mat-form-field>
+        <input matInput type="text" formControlName="username" placeholder="Benutzername">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput type="password" formControlName="password" placeholder="Passwort">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput type="password" formControlName="code" placeholder="Spiel-Code">
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit" (click)="signup()" [disabled]="!form.valid || !form.dirty">Registrieren</button>
+    <button mat-flat-button color="secondary" (click)="login()">Login</button>
+</form>

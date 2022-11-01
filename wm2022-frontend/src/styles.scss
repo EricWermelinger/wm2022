@@ -1,4 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
-
-html, body { height: 100%; }
+html, body { height: calc(100% - 16px); }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+// toasty
+.toast-container .ngx-toastr {
+    padding: 0 !important;
+}
+
+// form
+form.one-row {
+    display: grid;
+    grid-template-columns: 240px;
+    button {
+        margin-bottom: 16px;
+    }
+}
+
+// margin
+.margin-top-16 {
+    margin-top: 16px;
+}
+
+// align
+.right-align {
+    text-align: right;
+}

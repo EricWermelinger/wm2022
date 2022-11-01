@@ -1,0 +1,22 @@
+<div *ngIf="bet?.edtiable; else readMode" class="bet">
+    <h3>{{ bet?.team1 }}</h3>
+    <h3>-</h3>
+    <h3>{{ bet?.team1 }}</h3>
+    <mat-form-field>
+        <input matInput type="number" formControlName="score1">
+    </mat-form-field>
+    <h2>:</h2>
+    <mat-form-field>
+        <input matInput type="number" formControlName="score2">
+    </mat-form-field>
+</div>
+<ng-template #readMode>
+    <div class="bet">
+        <h3>{{ bet?.team1 }}</h3>
+        <h3>-</h3>
+        <h3>{{ bet?.team1 }}</h3>
+        <h2>{{ bet?.score1 }}</h2>
+        <h2>:</h2>
+        <h2>{{ bet?.score2 }}</h2>
+    </div>
+</ng-template>

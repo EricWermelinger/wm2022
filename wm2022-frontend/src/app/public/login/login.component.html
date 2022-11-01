@@ -1,0 +1,11 @@
+<h1>WM Tippspiel 2022 - Login</h1>
+<form [formGroup]="form" class="one-row">
+    <mat-form-field>
+        <input matInput type="text" formControlName="username" placeholder="Benutzername">
+    </mat-form-field>
+    <mat-form-field>
+        <input matInput type="password" formControlName="password" placeholder="Passwort">
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit" (click)="login()" [disabled]="!form.valid || !form.dirty">Login</button>
+    <button mat-flat-button color="secondary" (click)="signup()">Registrieren</button>
+</form>
