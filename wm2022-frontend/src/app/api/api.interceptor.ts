@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { catchError, NEVER, Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { TokenService } from '../secured/security/token.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -16,7 +15,7 @@ export class ApiInterceptor implements HttpInterceptor {
   private cloneRequest(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
     return request.clone({
       setHeaders: {
-        [environment.BEARER]: `${token}`
+        Authorization: `Bearer ${token}`,
       }
     });
   }
@@ -32,7 +31,7 @@ export class ApiInterceptor implements HttpInterceptor {
         if (err.status === 401) {
           this.token.logout();
         }
-        this.toastr.show(err.message, 'Fehler...', { positionClass: 'toast-bottom-right' });
+        this.toastr.show(err.error, 'Fehler...', { positionClass: 'toast-bottom-right' });
         return NEVER;
       }),
     )

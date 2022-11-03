@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes/routes');
+const cors = require('cors');
 require('dotenv').config();
 
 mongoose.connect(process.env.CONNECTION_STRING, {
@@ -14,7 +15,9 @@ db.once('open', () => console.log('Connected to Database'));
 
 const app = express();
 app.use(express.json());
+app.use(cors({
+    origin: process.env.URL_FRONTEND
+}));
 app.use('/api', routes);
-app.listen(3000, () => {
-    console.log('Listening on port 3000');
-});
+
+app.listen(process.env.PORT, () => console.log('Server Started'));
