@@ -6,7 +6,7 @@ export interface BetsResponse {
     team2: string;
     score1: number;
     score2: number;
-    edtiable: boolean;
+    editable: boolean;
     points: number;
     round: Round;
 }

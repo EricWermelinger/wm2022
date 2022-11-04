@@ -1,8 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { Model } = require('mongoose');
+const mongoose = require('mongoose');
 var crypto = require('crypto'); 
 const router = express.Router();
+const userModel = require("../model/user-model");
 module.exports = router;
 
 router.post('/login', async (req, res) => {
@@ -10,12 +11,12 @@ router.post('/login', async (req, res) => {
     const password = req.body.password;
 
     try {
-        const user = await Model.findOne({ username: username, password: password });
+        const user = await userModel.findOne({ username: username, password: password });
         if (user != null && crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex') === user.hash) {
             const token = jwt.sign({ name: user.username, isAdmin: user.isAdmin }, process.env.ACCESS_TOKEN_SECRET);
             res.status(200).json({ token });
         } else {
-            res.status(401).send('Benutzername oder Passwort falsch.');
+            res.status(400).send('Benutzername oder Passwort falsch.');
         }
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
@@ -27,17 +28,17 @@ router.post('/signup', async (req, res) => {
     const password = req.body.password;
     const code = req.body.code;
 
-    if (code !== process.env.SIGNUP_CODE) {
-        return res.status(401).send('Code ist ungültig.');
+    if (code !== process.env.REGISTER_CODE) {
+        return res.status(400).send('Code ist ungültig.');
     }
     try {
-        const user = await Model.findOne({ username: username });
+        const user = await userModel.findOne({ username: username });
         if (user) {
-            return res.status(401).send('Benutzername ist bereits vergeben.');
+            return res.status(400).send('Benutzername ist bereits vergeben.');
         }
         const salt = crypto.randomBytes(16).toString('hex');
         const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-        const newUser = new Model({
+        const newUser = new userModel({
             username: username,
             hash: hash,
             salt: salt,
@@ -45,7 +46,7 @@ router.post('/signup', async (req, res) => {
             bets: getSchedule(),
         });
         await newUser.save();
-        const token = jwt.sign({ name: user.username, isAdmin: user.isAdmin }, process.env.ACCESS_TOKEN_SECRET);
+        const token = jwt.sign({ name: newUser.username, isAdmin: newUser.isAdmin }, process.env.ACCESS_TOKEN_SECRET);
         res.status(200).json({ token });
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
@@ -54,16 +55,16 @@ router.post('/signup', async (req, res) => {
 
 router.get('/bets', authenticate, async (req, res) => {
     try {
-        const user = await Model.findOne({ username: req.user.name });
+        const user = await userModel.findOne({ username: req.user.name });
         const bets = user.bets.map(bet => {
             return {
                 id: bet.id,
                 team1: bet.team1,
                 team2: bet.team2,
-                bet1: bet.bet1,
-                bet2: bet.bet2,
+                score1: bet.score1,
+                score2: bet.score2,
                 editable: bet.date > new Date(),
-                points: calculatePoints(bet.bet1, bet.bet2, bet.real1, bet.real2),
+                points: new Date() > bet.date ? calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2) : 0,
                 round: numberToRound(bet.round),
             }
         });
@@ -75,11 +76,11 @@ router.get('/bets', authenticate, async (req, res) => {
 
 router.post('/bets', authenticate, async (req, res) => {
     try {
-        const user = await Model.findOne({ username: req.user.name });
-        const bet = user.bets.find(bet => bet.id === req.body.id);
-        if (bet && bet.date > new Date()) {
-            bet.bet1 = req.body.bet1;
-            bet.bet2 = req.body.bet2;
+        const user = await userModel.findOne({ username: req.user.name });
+        if (!!user && user.bets.some(bet => bet.id === req.body.id) && user.bets.find(bet => bet.id === req.body.id).date > new Date()) {
+            user.bets.find(bet => bet.id === req.body.id).score1 = req.body.score1;
+            user.bets.find(bet => bet.id === req.body.id).score2 = req.body.score2;
+            user.markModified('bets');
             await user.save();
             res.status(200).send();
         } else {
@@ -95,7 +96,7 @@ router.post('/result', authenticateAdmin, async (req, res) => {
         const id = req.body.id;
         const real1 = req.body.real1;
         const real2 = req.body.real2;
-        const users = await Model.find();
+        const users = await userModel.find();
         users.forEach(user => {
             const bet = user.bets.find(bet => bet.id === id);
             if (bet) {
@@ -103,7 +104,8 @@ router.post('/result', authenticateAdmin, async (req, res) => {
                 bet.real2 = real2;
             }
         });
-        await Model.updateMany({}, users);
+        users.forEach(user => user.markModified('bets'));
+        await userModel.updateMany({}, users);
         res.status(200).send();
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
@@ -113,7 +115,7 @@ router.post('/result', authenticateAdmin, async (req, res) => {
 
 router.get('/leaderboard', authenticate, async (req, res) => {
     try {
-        const allUsers = await Model.find();
+        const allUsers = await userModel.find();
         const leaderboard = allUsers.map(user => {
             const username = user.username;
             const points = user.bets.map(bet => {
@@ -171,11 +173,11 @@ function authenticateAdmin(req, res, next) {
     });
 }
 
-function calculatePoints(bet1, bet2, real1, real2) {
-    const points = (bet1 - bet2 > 0 && real1 - real2 > 0) || (bet1 - bet2 < 0 && real1 - real2 < 0) || (bet1 - bet2 === 0 && real1 - real2 === 0) ? parseInt(process.env.POINTS_GOAL_DIFFERENCE) : 0
-        + (bet1 - bet2 === real1 - real2 ? parseInt(process.env.POINTS_GOAL_DIFFERENCE) : 0)
-        + (bet1 === real1 && bet2 === real2) ? parseInt(process.env.POINTS_EXACT_MATCH) : 0;
-    return points;
+function calculatePoints(score1, score2, real1, real2) {
+    const sameWinner = ((score1 > score2 && real1 > real2) || (score1 < score2 && real1 < real2) || (score1 === score2 && real1 === real2)) ? parseInt(process.env.POINTS_TENDENCY) : 0;
+    const sameDifference = (score1 - score2 === real1 - real2) ? parseInt(process.env.POINTS_GOAL_DIFFERENCE) : 0;
+    const sameScore = (score1 === real1 && score2 === real2) ? parseInt(process.env.POINTS_EXACT_MATCH) : 0;
+    return sameWinner + sameDifference + sameScore;
 }
 
 function getSchedule() {
@@ -220,24 +222,24 @@ function getSchedule() {
         { id: 38, team1: 'Australien', team2: 'Dänemark', date: new Date('2022-11-30T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 39, team1: 'Polen', team2: 'Argentinien', date: new Date('2022-11-30T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 40, team1: 'Saudi-Arabien', team2: 'Mexiko', date: new Date('2022-11-30T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 41, team1: 'Kroatien', team2: 'Belgien', date: new Date('2022-12-1T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 42, team1: 'Kanada', team2: 'Marokko', date: new Date('2022-12-1T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 43, team1: 'Japan', team2: 'Spanien', date: new Date('2022-12-1T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 44, team1: 'Costa Rica', team2: 'Deutschland', date: new Date('2022-12-1T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 45, team1: 'Südkorea', team2: 'Portugal', date: new Date('2022-12-2T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 46, team1: 'Ghana', team2: 'Uruguay', date: new Date('2022-12-2T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 47, team1: 'Serbien', team2: 'Schweiz', date: new Date('2022-12-2T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 48, team1: 'Kamerun', team2: 'Brasilien', date: new Date('2022-12-2T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 49, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-3T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 50, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-3T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 51, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-4T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 52, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-4T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 53, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-5T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 54, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-5T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 55, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-6T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 56, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-6T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 57, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-9T16:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 58, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-9T20:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 41, team1: 'Kroatien', team2: 'Belgien', date: new Date('2022-12-01T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 42, team1: 'Kanada', team2: 'Marokko', date: new Date('2022-12-01T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 43, team1: 'Japan', team2: 'Spanien', date: new Date('2022-12-01T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 44, team1: 'Costa Rica', team2: 'Deutschland', date: new Date('2022-12-01T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 45, team1: 'Südkorea', team2: 'Portugal', date: new Date('2022-12-02T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 46, team1: 'Ghana', team2: 'Uruguay', date: new Date('2022-12-02T16:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 47, team1: 'Serbien', team2: 'Schweiz', date: new Date('2022-12-02T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 48, team1: 'Kamerun', team2: 'Brasilien', date: new Date('2022-12-02T20:00:00'), round: 3, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 49, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-03T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 50, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-03T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 51, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-04T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 52, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-04T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 53, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-05T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 54, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-05T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 55, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-06T16:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 56, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-06T20:00:00'), round: 4, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 57, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-09T16:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 58, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-09T20:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 59, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-10T16:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 60, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-10T20:00:00'), round: 5, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 61, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-13T20:00:00'), round: 6, score1: 0, score2: 0, real1: 0, real2: 0 },

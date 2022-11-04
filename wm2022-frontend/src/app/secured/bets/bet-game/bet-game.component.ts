@@ -24,7 +24,6 @@ export class BetGameComponent implements OnInit {
       score1: [0, Validators.required],
       score2: [0, Validators.required],
     }) as FormGroupTyped<BetsRequest>;
-    this.form.valueChanges.subscribe(bet => this.save(bet));
   }
 
   ngOnInit(): void {
@@ -33,7 +32,10 @@ export class BetGameComponent implements OnInit {
     }
   }
 
-  save(bet: BetsRequest) {
+  save() {
+    const bet = {
+      ...this.form.value,
+    }
     this.api.callApi(appRoutes.bets, bet, 'POST').subscribe();
   }
 }
