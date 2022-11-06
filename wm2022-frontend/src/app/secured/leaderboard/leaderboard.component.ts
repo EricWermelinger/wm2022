@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { ApiService } from 'src/app/api/api.service';
 import { Leaderboard } from 'src/app/dto/leaderboard';
 import { appRoutes } from '../security/appRoutes';

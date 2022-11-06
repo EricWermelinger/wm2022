@@ -1,23 +1,34 @@
-<mat-tab-group *ngIf="bets$ | async as bets" class="margin-top-16">
+<mat-tab-group *ngIf="bets$ | async as bets" [selectedIndex]="activeTab(bets)" class="margin-top-16">
     <mat-tab label="Gruppenspiele - Runde 1">
-        <app-bets-games [games]="filter(bets, 'first-round')"></app-bets-games>
+        <h2>Gruppenspiele - Runde 1</h2>
+        <app-bets-games [games]="filter(bets, 'first-round')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Gruppenspiele - Runde 2">
-        <app-bets-games [games]="filter(bets, 'second-round')"></app-bets-games>
+        <h2>Gruppenspiele - Runde 2</h2>
+        <app-bets-games [games]="filter(bets, 'second-round')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Gruppenspiele - Runde 3">
-        <app-bets-games [games]="filter(bets, 'third-round')"></app-bets-games>
+        <h2>Gruppenspiele - Runde 3</h2>
+        <app-bets-games [games]="filter(bets, 'third-round')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Achtelfinale">
-        <app-bets-games [games]="filter(bets, 'eighth-finals')"></app-bets-games>
+        <h2>Achtelfinale</h2>
+        <app-bets-games [games]="filter(bets, 'eighth-finals')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Viertelfinale">
-        <app-bets-games [games]="filter(bets, 'quarter-finals')"></app-bets-games>
+        <h2>Viertelfinale</h2>
+        <app-bets-games [games]="filter(bets, 'quarter-finals')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Halbfinale">
-        <app-bets-games [games]="filter(bets, 'semi-finals')"></app-bets-games>
+        <h2>Halbfinale</h2>
+        <app-bets-games [games]="filter(bets, 'semi-finals')" [isAdmin]="isAdmin"></app-bets-games>
     </mat-tab>
     <mat-tab label="Finale">
-        <app-bets-games [games]="filter(bets, 'final')"></app-bets-games>
+        <h2>Finale</h2>
+        <app-bets-games [games]="filter(bets, 'final')" [isAdmin]="isAdmin"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Weltmeister">
+        <h2>Weltmeister</h2>
+        <app-bets-world-champion [isAdmin]="isAdmin"></app-bets-world-champion>
     </mat-tab>
 </mat-tab-group>

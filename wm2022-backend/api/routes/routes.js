@@ -63,7 +63,10 @@ router.get('/bets', authenticate, async (req, res) => {
                 team2: bet.team2,
                 score1: bet.score1,
                 score2: bet.score2,
+                real1: bet.real1,
+                real2: bet.real2,
                 editable: bet.date > new Date(),
+                date: bet.date,
                 points: new Date() > bet.date ? calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2) : 0,
                 round: numberToRound(bet.round),
             }
@@ -91,7 +94,101 @@ router.post('/bets', authenticate, async (req, res) => {
     }
 });
 
-router.post('/result', authenticateAdmin, async (req, res) => {
+router.get('/worldChampion', authenticate, async (req, res) => {
+    try {
+        const user = await userModel.findOne({ username: req.user.name });
+        const worldChampion = {
+            worldChampion: user.worldChampion,
+            realWorldChampion: user.realWorldChampion,
+            editable: user.bets.every(bet => bet.date < new Date()),
+        }
+        res.status(200).json(worldChampion);
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.post('/worldChampion', authenticate, async (req, res) => {
+    try {
+        const user = await userModel.findOne({ username: req.user.name });
+        if (!!user && user.bets.sort((a, b) => a.date - b.date)[0].date < new Date()) {
+            user.worldChampion = req.body.worldChampion;
+            await user.save();
+            res.status(200).send();
+        } else {
+            res.status(500).send('Es ist ein Fehler aufgetreten.');
+        }
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.post('/adminWorldChampion', authenticateAdmin, async (req, res) => {
+    try {
+        const users = await userModel.find();
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            user.realWorldChampion = req.body.worldChampion;
+            user.markModified('realWorldChampion');
+            await user.save();
+        }
+        res.status(200).send();
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.get('/leaderboard', authenticate, async (req, res) => {
+    try {
+        const allUsers = await userModel.find();
+        const leaderboard = allUsers.map(user => {
+            const username = user.username;
+            const gamePoints = user.bets.map(bet => {
+                if (bet.date < new Date()) {
+                    return calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2);
+                }
+                return 0;
+            }).reduce((a, b) => a + b, 0);
+            const worldChampionPoints = user.worldChampion === user.realWorldChampion && user.realWorldChampion !== '' ? process.env.POINTS_WORLD_CHAMPION : 0;
+            return {
+                username,
+                points: parseInt(gamePoints) + parseInt(worldChampionPoints),
+            }
+        }).sort((a, b) => b.points - a.points);
+        const leaderboardWithPositions = leaderboard.map(user => {
+            const rank = leaderboard.filter(u => u.points < user.points).length + 1;
+            return {
+                ...user,
+                isCurrentUser: user.username === req.user.name,
+                position: rank,
+            };
+        });
+        res.status(200).json(leaderboardWithPositions);
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.get('/admin', authenticateAdmin, async (req, res) => {
+    try {
+        const user = await userModel.findOne({ username: req.user.name });
+        const results = user.bets.map(bet => {
+            return {
+                id: bet.id,
+                team1: bet.team1,
+                team2: bet.team2,
+                score1: bet.real1,
+                score2: bet.real2,
+                round: numberToRound(bet.round),
+            };
+        });
+        res.status(200).json(results);
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.post('/admin', authenticateAdmin, async (req, res) => {
     try {
         const id = req.body.id;
         const real1 = req.body.real1;
@@ -107,34 +204,6 @@ router.post('/result', authenticateAdmin, async (req, res) => {
         users.forEach(user => user.markModified('bets'));
         await userModel.updateMany({}, users);
         res.status(200).send();
-    } catch (err) {
-        res.status(500).send('Es ist ein Fehler aufgetreten.');
-    }
-});
-
-
-router.get('/leaderboard', authenticate, async (req, res) => {
-    try {
-        const allUsers = await userModel.find();
-        const leaderboard = allUsers.map(user => {
-            const username = user.username;
-            const points = user.bets.map(bet => {
-                if (bet.date < new Date()) {
-                    return calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2);
-                }
-                return 0;
-            }).reduce((a, b) => a + b, 0);
-            return {
-                username,
-                points,
-            }
-        }).sort((a, b) => b.points - a.points).map((user, index) => {
-            return {
-                ...user,
-                position: index + 1,
-            }
-        });
-        res.status(200).json(leaderboard);
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
     }
@@ -188,7 +257,7 @@ function getSchedule() {
         { id: 4, team1: 'USA', team2: 'Wales', date: new Date('2022-11-21T20:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 5, team1: 'Argentinien', team2: 'Saudi-Arabien', date: new Date('2022-11-22T11:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 6, team1: 'Dänemark', team2: 'Tunesien', date: new Date('2022-11-22T14:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
-        { id: 7, team1: 'Mexico', team2: 'Polen', date: new Date('2022-11-22T17:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
+        { id: 7, team1: 'Mexiko', team2: 'Polen', date: new Date('2022-11-22T17:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 8, team1: 'Frankreich', team2: 'Australien', date: new Date('2022-11-22T20:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 9, team1: 'Marokko', team2: 'Kroatien', date: new Date('2022-11-23T11:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 10, team1: 'Deutschland', team2: 'Japan', date: new Date('2022-11-23T14:00:00'), round: 1, score1: 0, score2: 0, real1: 0, real2: 0 },

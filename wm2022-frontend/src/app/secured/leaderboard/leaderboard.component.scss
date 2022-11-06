@@ -1,4 +1,16 @@
 .leaderboard {
     display: grid;
-    grid-template-columns: 40px 160px 80px;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    mat-card {
+        display: grid;
+        grid-template-columns: 20px 160px 80px;
+        gap: 16px;
+        width: 292px;
+    }
+}
+.current-user {
+    background-color: #e0e0e0;
 }

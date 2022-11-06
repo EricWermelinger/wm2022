@@ -2,3 +2,20 @@
     display: grid;
     grid-template-columns: 120px 40px 120px;
 }
+.card, .info {
+    width: 328px;
+}
+.matchup {
+    display: grid;
+    grid-template-columns: 25px 120px 6px 120px 25px;
+    gap: 8px;
+}
+.edit, .readonly {
+    display: grid;
+    grid-template-columns: 115px 30px 6px 30px 115px;
+    gap: 8px;
+}
+.info {
+    display: block;
+    margin-top: 12px;
+}

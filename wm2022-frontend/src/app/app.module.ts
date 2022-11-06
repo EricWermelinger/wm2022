@@ -18,6 +18,7 @@ import { ApiInterceptor } from './api/api.interceptor';
 import { PlayerComponent } from './secured/player/player.component';
 import { BetGameComponent } from './secured/bets/bet-game/bet-game.component';
 import { BetsGamesComponent } from './secured/bets/bets-games/bets-games.component';
+import { BetsWorldChampionComponent } from './secured/bets/bets-world-champion/bets-world-champion.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { BetsGamesComponent } from './secured/bets/bets-games/bets-games.compone
     PlayerComponent,
     BetGameComponent,
     BetsGamesComponent,
+    BetsWorldChampionComponent,
   ],
   imports: [
     BrowserModule,

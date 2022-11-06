@@ -22,6 +22,14 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: [],
     },
+    worldChampion: {
+        type: String,
+        default: '',
+    },
+    realWorldChampion: {
+        type: String,
+        default: '',
+    },
 });
 
 module.exports = mongoose.model('User', userSchema);

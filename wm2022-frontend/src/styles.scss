@@ -1,5 +1,10 @@
-html, body { height: calc(100% - 16px); }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body {
+    height: calc(100% - 16px);
+}
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 // toasty
 .toast-container .ngx-toastr {
@@ -23,4 +28,7 @@ form.one-row {
 // align
 .right-align {
     text-align: right;
+}
+.center-align {
+    text-align: center;
 }

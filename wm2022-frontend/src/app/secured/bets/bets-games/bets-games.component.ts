@@ -9,6 +9,7 @@ import { BetsResponse } from 'src/app/dto/bets';
 export class BetsGamesComponent implements OnInit {
 
   @Input() games: BetsResponse[] = [];
+  @Input() isAdmin: boolean = false;
   init: boolean = false;
 
   constructor() { }

@@ -13,6 +13,7 @@ import { appRoutes } from '../../security/appRoutes';
 export class BetGameComponent implements OnInit {
 
   @Input() bet?: BetsResponse = undefined;
+  @Input() isAdmin: boolean = false;
   form: FormGroupTyped<BetsRequest>;
 
   constructor(
@@ -21,8 +22,8 @@ export class BetGameComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       id: ['', Validators.required],
-      score1: [0, Validators.required],
-      score2: [0, Validators.required],
+      score1: [0, [Validators.required, Validators.min(0)]],
+      score2: [0, [Validators.required, Validators.min(0)]],
     }) as FormGroupTyped<BetsRequest>;
   }
 
@@ -36,6 +37,56 @@ export class BetGameComponent implements OnInit {
     const bet = {
       ...this.form.value,
     }
-    this.api.callApi(appRoutes.bets, bet, 'POST').subscribe();
+    if (this.isAdmin) {
+      this.api.callApi(appRoutes.admin, bet, 'POST').subscribe();
+    } else {
+      this.api.callApi(appRoutes.bets, bet, 'POST').subscribe();
+    }
+  }
+
+  countryToIso2Code(country: string) {
+    const countries = [
+      // Katar, Ecuador, Senegal, Niederlande
+      { name: 'Katar', code: 'qa' },
+      { name: 'Ecuador', code: 'ec' },
+      { name: 'Senegal', code: 'sn' },
+      { name: 'Niederlande', code: 'nl' },
+      // England, Iran, USA, Wales
+      { name: 'England', code: 'gb-eng' },
+      { name: 'Iran', code: 'ir' },
+      { name: 'USA', code: 'us' },
+      { name: 'Wales', code: 'gb-wls' },
+      // Argentinien, Saudi-Arabien, Mexiko, Polen
+      { name: 'Argentinien', code: 'ar' },
+      { name: 'Saudi-Arabien', code: 'sa' },
+      { name: 'Mexiko', code: 'mx' },
+      { name: 'Polen', code: 'pl' },
+      // Frankreich, Australien, Dänemark, Tunesion
+      { name: 'Frankreich', code: 'fr' },
+      { name: 'Australien', code: 'au' },
+      { name: 'Dänemark', code: 'dk' },
+      { name: 'Tunesien', code: 'tn' },
+      // Spanien, Costa Rica, Deutschland, Japan
+      { name: 'Spanien', code: 'es' },
+      { name: 'Costa Rica', code: 'cr' },
+      { name: 'Deutschland', code: 'de' },
+      { name: 'Japan', code: 'jp' },
+      // Belgien, Kanada, Marokko, Kroatien
+      { name: 'Belgien', code: 'be' },
+      { name: 'Kanada', code: 'ca' },
+      { name: 'Marokko', code: 'ma' },
+      { name: 'Kroatien', code: 'hr' },
+      // Brasilien, Serbien, Schweiz, Kamerun
+      { name: 'Brasilien', code: 'br' },
+      { name: 'Serbien', code: 'rs' },
+      { name: 'Schweiz', code: 'ch' },
+      { name: 'Kamerun', code: 'cm' },
+      // Portugal, Ghana, Uruguay, Südkorea
+      { name: 'Portugal', code: 'pt' },
+      { name: 'Ghana', code: 'gh' },
+      { name: 'Uruguay', code: 'uy' },
+      { name: 'Südkorea', code: 'kr' },
+    ];
+    return countries.find(c => c.name === country)?.code;
   }
 }

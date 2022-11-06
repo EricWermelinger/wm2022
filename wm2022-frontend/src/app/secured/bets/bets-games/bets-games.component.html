@@ -1,5 +1,5 @@
-<div *ngIf="(!init || games.length > 0); else noGames">
-    <app-bet-game *ngFor="let bet of games" [bet]="bet"></app-bet-game>
+<div *ngIf="(!init || games.length > 0); else noGames" class="games">
+    <app-bet-game *ngFor="let bet of games" [bet]="bet" [isAdmin]="isAdmin"></app-bet-game>
 </div>
 <ng-template #noGames>
     <h2>Keine Spiele verfügbar</h2>
