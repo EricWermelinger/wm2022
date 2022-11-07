@@ -16,8 +16,8 @@ export interface BetsResponse {
     id: string;
     team1: string;
     team2: string;
-    score1: number;
-    score2: number;
+    score1: number | null;
+    score2: number | null;
     real1: number;
     real2: number;
     editable: boolean;

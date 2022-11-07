@@ -6,4 +6,7 @@ export const appRoutes = {
     admin: 'admin',
     bets: 'bets',
     leaderboard: 'leaderboard',
+    other: 'othersBet',
+    worldChampion: 'worldChampion',
+    othersWorldChampion: 'othersWorldChampion',
 }

@@ -1,15 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { TokenService } from '../security/token.service';
 
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent {
 
-  constructor() { }
+  constructor(
+    private tokenService: TokenService,
+  ) { }
 
-  ngOnInit(): void {
+  logout() {
+    this.tokenService.logout();
   }
-
 }

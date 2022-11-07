@@ -180,6 +180,7 @@ router.get('/admin', authenticateAdmin, async (req, res) => {
                 score1: bet.real1,
                 score2: bet.real2,
                 round: numberToRound(bet.round),
+                date: bet.date,
             };
         });
         res.status(200).json(results);
@@ -204,6 +205,44 @@ router.post('/admin', authenticateAdmin, async (req, res) => {
         users.forEach(user => user.markModified('bets'));
         await userModel.updateMany({}, users);
         res.status(200).send();
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.get('/othersBet/:username', authenticate, async (req, res) => {
+    try {
+        const user = await userModel.findOne({ username: req.params.username });
+        const bets = user.bets.map(bet => {
+            return {
+                id: bet.id,
+                team1: bet.team1,
+                team2: bet.team2,
+                score1: bet.date < new Date() ? bet.score1 : null,
+                score2: bet.date < new Date() ? bet.score2 : null,
+                real1: bet.real1,
+                real2: bet.real2,
+                editable: bet.date > new Date(),
+                points: calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2),
+                round: numberToRound(bet.round),
+                date: bet.date,
+            };
+        });
+        res.status(200).json(bets);
+    } catch (err) {
+        res.status(500).send('Es ist ein Fehler aufgetreten.');
+    }
+});
+
+router.get('/othersWorldChampion/:username', authenticate, async (req, res) => {
+    try {
+        const user = await userModel.findOne({ username: req.params.username });
+        const visible = !user.bets.every(bet => bet.date > new Date());
+        if (visible) {
+            res.status(200).json({ worldChampion: user.worldChampion });
+        } else {
+            res.status(200).json({ worldChampion: '-' });
+        }
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
     }

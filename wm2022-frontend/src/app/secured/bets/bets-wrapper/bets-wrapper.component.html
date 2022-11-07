@@ -1,0 +1,34 @@
+<mat-tab-group *ngIf="init" [selectedIndex]="activeTab(bets)" class="margin-top-16">
+    <mat-tab label="Gruppenspiele - Runde 1">
+        <h2>Gruppenspiele - Runde 1</h2>
+        <app-bets-games [games]="filter(bets, 'first-round')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Gruppenspiele - Runde 2">
+        <h2>Gruppenspiele - Runde 2</h2>
+        <app-bets-games [games]="filter(bets, 'second-round')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Gruppenspiele - Runde 3">
+        <h2>Gruppenspiele - Runde 3</h2>
+        <app-bets-games [games]="filter(bets, 'third-round')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Achtelfinale">
+        <h2>Achtelfinale</h2>
+        <app-bets-games [games]="filter(bets, 'eighth-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Viertelfinale">
+        <h2>Viertelfinale</h2>
+        <app-bets-games [games]="filter(bets, 'quarter-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Halbfinale">
+        <h2>Halbfinale</h2>
+        <app-bets-games [games]="filter(bets, 'semi-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Finale">
+        <h2>Finale</h2>
+        <app-bets-games [games]="filter(bets, 'final')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Weltmeister">
+        <h2>Weltmeister</h2>
+        <app-bets-world-champion [isAdmin]="isAdmin" [isOther]="isOther" [username]="username"></app-bets-world-champion>
+    </mat-tab>
+</mat-tab-group>

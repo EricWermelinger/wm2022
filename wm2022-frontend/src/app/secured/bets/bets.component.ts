@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, Inject, Optional } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ApiService } from 'src/app/api/api.service';
-import { BetsResponse, NumberOfRound, Round } from 'src/app/dto/bets';
+import { BetsResponse } from 'src/app/dto/bets';
 import { appRoutes } from '../security/appRoutes';
 
 @Component({
@@ -14,28 +15,32 @@ export class BetsComponent {
 
   bets$: Observable<BetsResponse[]>;
   isAdmin: boolean = false;
+  isOther: boolean = false;
 
   constructor(
     private api: ApiService,
     private activatedRoute: ActivatedRoute,
+    @Optional() @Inject(MAT_DIALOG_DATA) public username: string | undefined,
   ) {
-    this.isAdmin = this.activatedRoute.snapshot.url[0].path === appRoutes.admin;
+    this.isAdmin = this.activatedRoute.snapshot.url[0]?.path === appRoutes.admin;
+    this.isOther = !!this.username;
+    this.bets$ = this.api.callApi<BetsResponse[]>(this.getEndpoint(), this.getParams(), 'GET');
+  }
+
+  getEndpoint() {
     if (this.isAdmin) {
-      this.bets$ = this.api.callApi<BetsResponse[]>(appRoutes.admin, { }, 'GET');
-    } else {
-      this.bets$ = this.api.callApi<BetsResponse[]>(appRoutes.bets, { }, 'GET');
+      return appRoutes.admin;
     }
+    if (this.isOther) {
+      return appRoutes.other;
+    }
+    return appRoutes.bets;
   }
 
-  filter(bets: BetsResponse[], round: Round) {
-    return bets.filter(bet => bet.round === round);
-  }
-
-  activeTab(bets: BetsResponse[]) {
-    const rounds = bets.filter(bet => bet.editable).map(bet => NumberOfRound(bet.round)).sort((a, b) => a - b);
-    if (rounds.length > 0) {
-      return rounds[0] - 1;
+  getParams() {
+    if (this.isOther) {
+      return { username: this.username };
     }
-    return 0;
+    return {};
   }
 }

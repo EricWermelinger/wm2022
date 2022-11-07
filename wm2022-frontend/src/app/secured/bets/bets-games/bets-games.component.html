@@ -1,6 +1,6 @@
 <div *ngIf="(!init || games.length > 0); else noGames" class="games">
-    <app-bet-game *ngFor="let bet of games" [bet]="bet" [isAdmin]="isAdmin"></app-bet-game>
+    <app-bet-game *ngFor="let bet of games" [bet]="bet" [isAdmin]="isAdmin" [isOther]="isOther"></app-bet-game>
 </div>
 <ng-template #noGames>
-    <h2>Keine Spiele verfügbar</h2>
+    <h3>Keine Spiele verfügbar</h3>
 </ng-template>

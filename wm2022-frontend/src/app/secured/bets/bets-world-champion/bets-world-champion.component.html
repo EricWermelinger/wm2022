@@ -1,5 +1,5 @@
 <div *ngIf="bet$ | async as bet">
-    <form *ngIf="isAdmin || bet.editable; else readOnly">
+    <form *ngIf="!isOther && (isAdmin || bet.editable); else readOnly">
         <mat-form-field>
             <mat-label>Weltmeister</mat-label>
             <mat-select formControlName="worldChampion" (selectionChange)="save($event.value)">
@@ -10,6 +10,6 @@
         </mat-form-field>
     </form>
     <ng-template #readOnly>
-        <h3>{{ 'Dein Tipp: ' }} {{ bet.worldChampion === '' ? '-' : bet.worldChampion }}</h3>
+        <h3>{{ 'Tipp: ' }} {{ bet.worldChampion === '' ? '-' : bet.worldChampion }}</h3>
     </ng-template>
 </div>

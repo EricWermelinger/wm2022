@@ -7,7 +7,7 @@
         <h3><span [class]="'flag-icon flag-icon-' + countryToIso2Code(bet?.team2!)"></span></h3>
     </div>
     <mat-divider></mat-divider>
-    <form *ngIf="isAdmin || bet?.editable; else readMode" [formGroup]="form" class="edit">
+    <form *ngIf="!isOther && (isAdmin || bet?.editable); else readMode" [formGroup]="form" class="edit">
         <div></div>
         <mat-form-field>
             <input matInput type="number" formControlName="score1" (change)="save()">
@@ -19,16 +19,22 @@
         <div></div>
     </form>
     <ng-template #readMode>
-        <div class="readonly">
+        <div *ngIf="(isOther && !bet?.editable) || !isOther; else readonlyOther" class="readonly">
             <div></div>
             <h2 class="center-align">{{ bet?.score1 }}</h2>
             <h2>:</h2>
             <h2 class="center-align">{{ bet?.score2 }}</h2>
             <div></div>
         </div>
+        <ng-template #readonlyOther>
+            <div class="info center-align not-available">
+                {{ 'nicht verfügbar' }}
+            </div>
+        </ng-template>
     </ng-template>
     <mat-divider></mat-divider>
-    <div class="info center-align">
-        {{ bet?.editable ? (bet?.date | date: 'dd.MM.yyyy - HH:mm') : bet?.real1 + ' : ' + bet?.real2 + ' (' + bet?.points + ' Punkte)' }}
+    <div class="space"></div>
+    <div class="info center-align details">
+        {{ bet?.editable || isAdmin ? (bet?.date | date: 'dd.MM.yyyy - HH:mm') : bet?.real1 + ' : ' + bet?.real2 + ' (' + bet?.points + ' Punkte)' }}
     </div>
 </mat-card>

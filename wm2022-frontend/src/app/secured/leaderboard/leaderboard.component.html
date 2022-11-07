@@ -1,6 +1,6 @@
 <div *ngIf="leaderboard$ | async as leaderboard" class="leaderboard">
     <h2>Rangliste</h2>
-    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser }">
+    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser }" class="pointer" (click)="openDetail(player.username)">
         <div class="right-align">{{ player.position }}.</div>
         <div>{{ player.username }}</div>
         <div class="right-align">{{ player.points }}</div>

@@ -17,7 +17,7 @@ export class ApiService {
     let request;
     switch (method) {
       case 'GET':
-        request = this.http.get(url, { params: payload });
+        request = this.http.get(this.createUrl(url, payload));
         break;
       case 'POST':
         request = this.http.post(url, payload);
@@ -26,11 +26,20 @@ export class ApiService {
         request = this.http.put(url, payload);
         break;
       case 'DELETE':
-        request = this.http.delete(url, { params: payload });
+        request = this.http.delete(this.createUrl(url, payload));
         break;
     }
     return request as Observable<T>;
   };
+
+  createUrl(url: string, params: any) {
+    if (Object.keys(params).length !== 0) {
+      for (const key in params) {
+        url += `/${params[key]}`;
+      }
+    }
+    return url;
+  }
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';

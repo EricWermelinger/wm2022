@@ -10,6 +10,7 @@ export class BetsGamesComponent implements OnInit {
 
   @Input() games: BetsResponse[] = [];
   @Input() isAdmin: boolean = false;
+  @Input() isOther: boolean = false;
   init: boolean = false;
 
   constructor() { }

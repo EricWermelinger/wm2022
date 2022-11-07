@@ -19,6 +19,7 @@ import { PlayerComponent } from './secured/player/player.component';
 import { BetGameComponent } from './secured/bets/bet-game/bet-game.component';
 import { BetsGamesComponent } from './secured/bets/bets-games/bets-games.component';
 import { BetsWorldChampionComponent } from './secured/bets/bets-world-champion/bets-world-champion.component';
+import { BetsWrapperComponent } from './secured/bets/bets-wrapper/bets-wrapper.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { BetsWorldChampionComponent } from './secured/bets/bets-world-champion/b
     BetGameComponent,
     BetsGamesComponent,
     BetsWorldChampionComponent,
+    BetsWrapperComponent,
   ],
   imports: [
     BrowserModule,

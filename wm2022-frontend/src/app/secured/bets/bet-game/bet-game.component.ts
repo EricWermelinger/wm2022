@@ -14,6 +14,7 @@ export class BetGameComponent implements OnInit {
 
   @Input() bet?: BetsResponse = undefined;
   @Input() isAdmin: boolean = false;
+  @Input() isOther: boolean = false;
   form: FormGroupTyped<BetsRequest>;
 
   constructor(
@@ -28,8 +29,8 @@ export class BetGameComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.bet) {
-      this.form.patchValue(this.bet);
+    if (this.bet && this.bet.editable && this.bet.score1 !== null && this.bet.score2 !== null) {
+      this.form.patchValue(this.bet as BetsRequest);
     }
   }
 

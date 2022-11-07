@@ -1,19 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ApiService } from 'src/app/api/api.service';
 import { WorldChampion } from 'src/app/dto/worldChampion';
+import { appRoutes } from '../../security/appRoutes';
 
 @Component({
   selector: 'app-bets-world-champion',
   templateUrl: './bets-world-champion.component.html',
   styleUrls: ['./bets-world-champion.component.scss']
 })
-export class BetsWorldChampionComponent {
+export class BetsWorldChampionComponent implements OnInit {
 
   @Input() isAdmin: boolean = false;
+  @Input() isOther: boolean = false;
+  @Input() username: string = '';
   form: FormGroup;
-  bet$: Observable<WorldChampion>;
+  bet$: Observable<WorldChampion> | undefined;
 
   constructor(
     private api: ApiService,
@@ -22,9 +25,18 @@ export class BetsWorldChampionComponent {
     this.form = this.fb.group({
       worldChampion: ['', Validators.required],
     });
-    this.bet$ = this.api.callApi<WorldChampion>('worldChampion', {}, 'GET');
+  }
+
+  ngOnInit(): void {
+    if (!this.isOther) {
+      this.bet$ = this.api.callApi<WorldChampion>(appRoutes.worldChampion, {}, 'GET');
+    } else {
+      this.bet$ = this.api.callApi<WorldChampion>(appRoutes.othersWorldChampion, { username: this.username }, 'GET');
+    }
     this.bet$.subscribe((wc: any) => {
-      this.form.patchValue(wc.worldChampion);
+      if (!this.isOther) {
+        this.form.patchValue(wc.worldChampion);
+      }
     });
   }
 
