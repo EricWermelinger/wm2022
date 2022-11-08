@@ -1,0 +1,14 @@
+ToDo:
+- Testen
+
+Deployment steps:
+MongoDB:
+- Create Database
+- Whitelist IP
+- Create User
+- Create Cluster
+
+Angular:
+- npm i angular-cli-ghpages
+- ng build --configuration production --base-href https://EricWermelinger.github.io/wm2022/
+- npx ngh --dir dist/wm2022-frontend

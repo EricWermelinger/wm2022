@@ -1,3 +1,0 @@
-- Weltmeister implementieren
-- Fremdspieler Ansicht
-- Testen
