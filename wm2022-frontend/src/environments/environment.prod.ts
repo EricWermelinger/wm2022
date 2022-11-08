@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  URL_API: 'http://localhost:3000/api',
+  URL_API: 'https://wm2022.onrender.com/api',
   TOKEN_NAME: 'wm2022-token',
 };
