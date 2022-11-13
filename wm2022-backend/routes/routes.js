@@ -214,8 +214,8 @@ router.get('/admin', authenticateAdmin, async (req, res) => {
 router.post('/admin', authenticateAdmin, async (req, res) => {
     try {
         const id = req.body.id;
-        const real1 = req.body.real1;
-        const real2 = req.body.real2;
+        const real1 = req.body.score1;
+        const real2 = req.body.score2;
         const team1 = req.body.team1;
         const team2 = req.body.team2;
         const users = await userModel.find();
