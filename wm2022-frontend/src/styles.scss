@@ -37,3 +37,19 @@ form.one-row {
 .pointer {
     cursor: pointer;
 }
+
+// full page
+.full-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 600px;
+}
+
+// spinner
+.spinner-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

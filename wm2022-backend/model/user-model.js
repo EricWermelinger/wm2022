@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    wrongLoginAttempts: {
+        type: Number,
+        default: 0,
+    },
+    code: {
+        type: String,
+        default: '',
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);

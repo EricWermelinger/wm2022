@@ -30,4 +30,6 @@ export interface BetsRequest {
     id: string;
     score1: number;
     score2: number;
+    team1: string;
+    team2: string;
 }

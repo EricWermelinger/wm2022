@@ -22,7 +22,10 @@ export class LeaderboardComponent {
     this.leaderboard$ = this.api.callApi<Leaderboard[]>(appRoutes.leaderboard, { }, 'GET');
   }
 
-  openDetail(username: string) {
+  openDetail(isCurrentUser: boolean, username: string) {
+    if (isCurrentUser) {
+      return;
+    }
     this.dialog.open(BetsComponent, {
       data: username,
     });

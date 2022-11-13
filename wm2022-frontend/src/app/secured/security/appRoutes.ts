@@ -9,4 +9,5 @@ export const appRoutes = {
     other: 'othersBet',
     worldChampion: 'worldChampion',
     othersWorldChampion: 'othersWorldChampion',
+    wakeUp: 'wakeUp',
 }

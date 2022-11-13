@@ -1,14 +1,19 @@
-<h1>WM Tippspiel 2022 - Registrieren</h1>
-<form [formGroup]="form" class="one-row">
-    <mat-form-field>
-        <input matInput type="text" formControlName="username" placeholder="Benutzername">
-    </mat-form-field>
-    <mat-form-field>
-        <input matInput type="password" formControlName="password" placeholder="Passwort">
-    </mat-form-field>
-    <mat-form-field>
-        <input matInput type="password" formControlName="code" placeholder="Spiel-Code">
-    </mat-form-field>
-    <button mat-flat-button color="primary" type="submit" (click)="signup()" [disabled]="!form.valid || !form.dirty">Registrieren</button>
-    <button mat-flat-button color="secondary" (click)="login()">Login</button>
-</form>
+<div class="full-page">
+    <h1 class="center-align">WM Tippspiel 2022 - Registrieren</h1>
+    <form [formGroup]="form" class="one-row">
+        <mat-form-field appearance="outline">
+            <mat-label>Benutzername</mat-label>
+            <input matInput type="text" formControlName="username">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Passwort</mat-label>
+            <input matInput type="password" formControlName="password">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Spiel-Code</mat-label>
+            <input matInput type="password" formControlName="code">
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit" (click)="signup()" [disabled]="!form.valid || !form.dirty">Registrieren</button>
+        <button mat-flat-button color="secondary" (click)="login()">Login</button>
+    </form>
+</div>

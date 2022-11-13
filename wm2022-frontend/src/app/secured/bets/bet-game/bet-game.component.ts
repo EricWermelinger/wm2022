@@ -23,15 +23,15 @@ export class BetGameComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       id: ['', Validators.required],
-      score1: [0, [Validators.required, Validators.min(0)]],
-      score2: [0, [Validators.required, Validators.min(0)]],
+      score1: [0, [Validators.required, Validators.min(0), Validators.max(9)]],
+      score2: [0, [Validators.required, Validators.min(0), Validators.max(9)]],
+      team1: '',
+      team2: '',
     }) as FormGroupTyped<BetsRequest>;
   }
 
   ngOnInit(): void {
-    if (this.bet && this.bet.editable && this.bet.score1 !== null && this.bet.score2 !== null) {
-      this.form.patchValue(this.bet as BetsRequest);
-    }
+    this.form.patchValue(this.bet as BetsRequest);
   }
 
   save() {

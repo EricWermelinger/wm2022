@@ -20,6 +20,7 @@ import { BetGameComponent } from './secured/bets/bet-game/bet-game.component';
 import { BetsGamesComponent } from './secured/bets/bets-games/bets-games.component';
 import { BetsWorldChampionComponent } from './secured/bets/bets-world-champion/bets-world-champion.component';
 import { BetsWrapperComponent } from './secured/bets/bets-wrapper/bets-wrapper.component';
+import { SpinnerDirective } from './material/spinner.directive';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { BetsWrapperComponent } from './secured/bets/bets-wrapper/bets-wrapper.c
     BetsGamesComponent,
     BetsWorldChampionComponent,
     BetsWrapperComponent,
+    SpinnerDirective,
   ],
   imports: [
     BrowserModule,

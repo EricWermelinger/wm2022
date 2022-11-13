@@ -1,5 +1,6 @@
 ToDo:
 - Testen
+-- Align center for goals
 
 Deployment steps:
 MongoDB:
@@ -12,3 +13,8 @@ Angular:
 - npm i angular-cli-ghpages
 - ng build --configuration production --base-href https://EricWermelinger.github.io/wm2022/
 - npx ngh --dir dist/wm2022-frontend
+
+Render:
+- pipeline on server like:
+-- npm i
+-- node index.js

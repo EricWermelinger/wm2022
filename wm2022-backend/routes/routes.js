@@ -12,10 +12,15 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await userModel.findOne({ username: username, password: password });
+        if (user.wrongLoginAttempts > process.env.WRONG_LOGIN_ATTEMPTS) {
+            return res.status(401).send('Benutzer wurde gesperrt.');
+        }
         if (user != null && crypto.pbkdf2Sync(password, user.salt, 1000, 64, 'sha512').toString('hex') === user.hash) {
             const token = jwt.sign({ name: user.username, isAdmin: user.isAdmin }, process.env.ACCESS_TOKEN_SECRET);
             res.status(200).json({ token });
         } else {
+            user.wrongLoginAttempts = (user.wrongLoginAttempts ?? 0) + 1;
+            await user.save();
             res.status(400).send('Benutzername oder Passwort falsch.');
         }
     } catch (err) {
@@ -28,10 +33,15 @@ router.post('/signup', async (req, res) => {
     const password = req.body.password;
     const code = req.body.code;
 
-    if (code !== process.env.REGISTER_CODE) {
+    const valid = process.env.REGISTER_CODES.split(',').some(c => c === code);
+    if (!valid) {
         return res.status(400).send('Code ist ungültig.');
     }
     try {
+        const codeUsed = await userModel.findOne({ code: code });
+        if (codeUsed != null) {
+            return res.status(400).send('Code ist ungültig.');
+        }
         const user = await userModel.findOne({ username: username });
         if (user) {
             return res.status(400).send('Benutzername ist bereits vergeben.');
@@ -44,6 +54,7 @@ router.post('/signup', async (req, res) => {
             salt: salt,
             isAdmin: username === process.env.ADMIN_USERNAME,
             bets: getSchedule(),
+            code: code,
         });
         await newUser.save();
         const token = jwt.sign({ name: newUser.username, isAdmin: newUser.isAdmin }, process.env.ACCESS_TOKEN_SECRET);
@@ -100,7 +111,7 @@ router.get('/worldChampion', authenticate, async (req, res) => {
         const worldChampion = {
             worldChampion: user.worldChampion,
             realWorldChampion: user.realWorldChampion,
-            editable: user.bets.every(bet => bet.date < new Date()),
+            editable: user.bets.every(bet => bet.date > new Date()),
         }
         res.status(200).json(worldChampion);
     } catch (err) {
@@ -111,7 +122,7 @@ router.get('/worldChampion', authenticate, async (req, res) => {
 router.post('/worldChampion', authenticate, async (req, res) => {
     try {
         const user = await userModel.findOne({ username: req.user.name });
-        if (!!user && user.bets.sort((a, b) => a.date - b.date)[0].date < new Date()) {
+        if (!!user && user.bets.every(bet => bet.date > new Date())) {
             user.worldChampion = req.body.worldChampion;
             await user.save();
             res.status(200).send();
@@ -154,9 +165,20 @@ router.get('/leaderboard', authenticate, async (req, res) => {
                 username,
                 points: parseInt(gamePoints) + parseInt(worldChampionPoints),
             }
-        }).sort((a, b) => b.points - a.points);
+        }).sort((a, b) => {
+            if (a.points === b.points) {
+                if (a.username === req.user.name) {
+                    return -1;
+                }
+                if (b.username === req.user.name) {
+                    return 1;
+                }
+                return a.username.localeCompare(b.username);
+            }
+            return b.points - a.points;
+        });
         const leaderboardWithPositions = leaderboard.map(user => {
-            const rank = leaderboard.filter(u => u.points < user.points).length + 1;
+            const rank = leaderboard.filter(u => u.points > user.points).length + 1;
             return {
                 ...user,
                 isCurrentUser: user.username === req.user.name,
@@ -194,16 +216,21 @@ router.post('/admin', authenticateAdmin, async (req, res) => {
         const id = req.body.id;
         const real1 = req.body.real1;
         const real2 = req.body.real2;
+        const team1 = req.body.team1;
+        const team2 = req.body.team2;
         const users = await userModel.find();
-        users.forEach(user => {
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
             const bet = user.bets.find(bet => bet.id === id);
-            if (bet) {
+            if (!!bet) {
                 bet.real1 = real1;
                 bet.real2 = real2;
+                bet.team1 = team1;
+                bet.team2 = team2;
             }
-        });
-        users.forEach(user => user.markModified('bets'));
-        await userModel.updateMany({}, users);
+            user.markModified('bets');
+            await user.save();
+        }
         res.status(200).send();
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
@@ -241,11 +268,15 @@ router.get('/othersWorldChampion/:username', authenticate, async (req, res) => {
         if (visible) {
             res.status(200).json({ worldChampion: user.worldChampion });
         } else {
-            res.status(200).json({ worldChampion: '-' });
+            res.status(200).json({ worldChampion: 'nicht verfügbar' });
         }
     } catch (err) {
         res.status(500).send('Es ist ein Fehler aufgetreten.');
     }
+});
+
+router.post('/wakeUp', async(_, res) => {
+    res.status(200).json({});
 });
 
 function authenticate(req, res, next) {
@@ -355,7 +386,17 @@ function getSchedule() {
         { id: 63, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-17T16:00:00'), round: 7, score1: 0, score2: 0, real1: 0, real2: 0 },
         { id: 64, team1: 'tbd', team2: 'tbd', date: new Date('2022-12-18T16:00:00'), round: 7, score1: 0, score2: 0, real1: 0, real2: 0 }
     ];
-    return schedule;
+    if (process.env.USE_TEST_SCHEDULE !== 'true') {
+        return schedule;
+    }
+
+    const testSchedule = schedule.filter(game => [1, 2, 17, 18, 33, 34, 49, 50, 57, 58, 61, 62, 63, 64].includes(game.id)).map(game => {
+        return {
+            ...game,
+            date: addMinutes(new Date(), game.id),
+        }
+    });
+    return testSchedule;
 }
 
 function numberToRound(number) {
@@ -377,4 +418,8 @@ function numberToRound(number) {
         default:
             return 'first-round';
     }
+}
+
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
 }
