@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from 'src/app/api/api.service';
@@ -12,9 +12,10 @@ import { TokenService } from 'src/app/secured/security/token.service';
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
 
   form: FormGroupTyped<SignupRequest>;
+  showSpinner = true;
 
   constructor(
     private api: ApiService,
@@ -27,6 +28,10 @@ export class SignupComponent {
       password: ['', Validators.required],
       code: ['', Validators.required],
     }) as FormGroupTyped<SignupRequest>;
+  }
+
+  ngOnInit(): void {
+    this.api.callApi(appRoutes.wakeUp, {}, 'POST').subscribe(_ => this.showSpinner = false);
   }
 
   signup() {
