@@ -2,9 +2,9 @@
     <h1>WM Tippspiel 2022</h1>
     <button mat-flat-button color="secondary" (click)="logout()" class="logout">Logout</button>
 </div>
-<mat-tab-group>
+<mat-tab-group *ngIf="!showSpinner; else spinner">
     <mat-tab label="Rangliste">
-        <app-leaderboard></app-leaderboard>
+        <app-leaderboard [leaderboard]="leaderboard"></app-leaderboard>
     </mat-tab>
     <mat-tab label="Deine Tipps">
         <app-bets></app-bets>
@@ -25,3 +25,8 @@
         </div>
     </mat-tab>
 </mat-tab-group>
+<ng-template #spinner>
+    <div class="full-page">
+        <div *showSpinner="true"></div>
+    </div>
+</ng-template>

@@ -1,10 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { map, Observable } from 'rxjs';
-import { ApiService } from 'src/app/api/api.service';
 import { Leaderboard } from 'src/app/dto/leaderboard';
 import { BetsComponent } from '../bets/bets.component';
-import { appRoutes } from '../security/appRoutes';
 
 @Component({
   selector: 'app-leaderboard',
@@ -13,14 +10,11 @@ import { appRoutes } from '../security/appRoutes';
 })
 export class LeaderboardComponent {
 
-  leaderboard$: Observable<Leaderboard[]>;
+  @Input() leaderboard: Leaderboard[] = [];
 
   constructor(
-    private api: ApiService,
     private dialog: MatDialog,
-  ) {
-    this.leaderboard$ = this.api.callApi<Leaderboard[]>(appRoutes.leaderboard, { }, 'GET');
-  }
+  ) { }
 
   openDetail(isCurrentUser: boolean, username: string) {
     if (isCurrentUser) {
