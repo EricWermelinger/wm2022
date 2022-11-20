@@ -1,5 +1,5 @@
 <div *ngIf="bet$ | async as bet" class="world-champion">
-    <form *ngIf="!isOther && (isAdmin || bet.editable); else readOnly">
+    <form *ngIf="!isOther && (isAdmin || bet.editable); else readOnly" [formGroup]="form">
         <mat-form-field>
             <mat-label>Weltmeister</mat-label>
             <mat-select formControlName="worldChampion" (selectionChange)="save($event.value)">

@@ -35,7 +35,7 @@ export class BetsWorldChampionComponent implements OnInit {
     }
     this.bet$.subscribe((wc: any) => {
       if (!this.isOther) {
-        this.form.patchValue(wc.worldChampion);
+        this.form.controls['worldChampion'].patchValue(wc.worldChampion);
       }
     });
   }

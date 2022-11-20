@@ -76,9 +76,9 @@ router.get('/bets', authenticate, async (req, res) => {
                 score2: bet.score2,
                 real1: bet.real1,
                 real2: bet.real2,
-                editable: bet.date > new Date(),
-                date: bet.date,
-                points: new Date() > bet.date ? calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2) : 0,
+                editable: bet.date > getNewDateEuropeTimeZone(),
+                date: getFrontendDate(bet.date),
+                points: getNewDateEuropeTimeZone() > bet.date ? calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2) : 0,
                 round: numberToRound(bet.round),
             }
         });
@@ -91,7 +91,7 @@ router.get('/bets', authenticate, async (req, res) => {
 router.post('/bets', authenticate, async (req, res) => {
     try {
         const user = await userModel.findOne({ username: req.user.name });
-        if (!!user && user.bets.some(bet => bet.id === req.body.id) && user.bets.find(bet => bet.id === req.body.id).date > new Date()) {
+        if (!!user && user.bets.some(bet => bet.id === req.body.id) && user.bets.find(bet => bet.id === req.body.id).date > getNewDateEuropeTimeZone()) {
             user.bets.find(bet => bet.id === req.body.id).score1 = req.body.score1;
             user.bets.find(bet => bet.id === req.body.id).score2 = req.body.score2;
             user.markModified('bets');
@@ -111,7 +111,7 @@ router.get('/worldChampion', authenticate, async (req, res) => {
         const worldChampion = {
             worldChampion: user.worldChampion,
             realWorldChampion: user.realWorldChampion,
-            editable: user.bets.every(bet => bet.date > new Date()),
+            editable: user.bets.every(bet => bet.date > getNewDateEuropeTimeZone()),
         }
         res.status(200).json(worldChampion);
     } catch (err) {
@@ -122,7 +122,7 @@ router.get('/worldChampion', authenticate, async (req, res) => {
 router.post('/worldChampion', authenticate, async (req, res) => {
     try {
         const user = await userModel.findOne({ username: req.user.name });
-        if (!!user && user.bets.every(bet => bet.date > new Date())) {
+        if (!!user && user.bets.every(bet => bet.date > getNewDateEuropeTimeZone())) {
             user.worldChampion = req.body.worldChampion;
             await user.save();
             res.status(200).send();
@@ -155,7 +155,7 @@ router.get('/leaderboard', authenticate, async (req, res) => {
         const leaderboard = allUsers.map(user => {
             const username = user.username;
             const gamePoints = user.bets.map(bet => {
-                if (bet.date < new Date()) {
+                if (bet.date < getNewDateEuropeTimeZone()) {
                     return calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2);
                 }
                 return 0;
@@ -202,7 +202,7 @@ router.get('/admin', authenticateAdmin, async (req, res) => {
                 score1: bet.real1,
                 score2: bet.real2,
                 round: numberToRound(bet.round),
-                date: bet.date,
+                date: getFrontendDate(bet.date),
             };
         });
         res.status(200).json(results);
@@ -245,14 +245,14 @@ router.get('/othersBet/:username', authenticate, async (req, res) => {
                 id: bet.id,
                 team1: bet.team1,
                 team2: bet.team2,
-                score1: bet.date < new Date() ? bet.score1 : null,
-                score2: bet.date < new Date() ? bet.score2 : null,
+                score1: bet.date < getNewDateEuropeTimeZone() ? bet.score1 : null,
+                score2: bet.date < getNewDateEuropeTimeZone() ? bet.score2 : null,
                 real1: bet.real1,
                 real2: bet.real2,
-                editable: bet.date > new Date(),
+                editable: bet.date > getNewDateEuropeTimeZone(),
                 points: calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2),
                 round: numberToRound(bet.round),
-                date: bet.date,
+                date: getFrontendDate(bet.date),
             };
         });
         res.status(200).json(bets);
@@ -264,7 +264,7 @@ router.get('/othersBet/:username', authenticate, async (req, res) => {
 router.get('/othersWorldChampion/:username', authenticate, async (req, res) => {
     try {
         const user = await userModel.findOne({ username: req.params.username });
-        const visible = !user.bets.every(bet => bet.date > new Date());
+        const visible = !user.bets.every(bet => bet.date > getNewDateEuropeTimeZone());
         if (visible) {
             res.status(200).json({ worldChampion: user.worldChampion });
         } else {
@@ -422,4 +422,13 @@ function numberToRound(number) {
 
 function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes*60000);
+}
+
+function getNewDateEuropeTimeZone() {
+    const date = new Date();
+    return addMinutes(date, 60);
+}
+
+function getFrontendDate(date) {
+    return addMinutes(date, -60);
 }
