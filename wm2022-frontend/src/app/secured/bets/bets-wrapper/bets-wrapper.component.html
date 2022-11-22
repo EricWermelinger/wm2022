@@ -1,8 +1,4 @@
 <mat-tab-group *ngIf="init" [selectedIndex]="activeTab(bets)" class="margin-top-16">
-    <mat-tab label="Weltmeister">
-        <h2 class="center-align">Weltmeister</h2>
-        <app-bets-world-champion [isAdmin]="isAdmin" [isOther]="isOther" [username]="username"></app-bets-world-champion>
-    </mat-tab>
     <mat-tab label="Gruppenspiele - Runde 1">
         <h2 class="center-align">Gruppenspiele - Runde 1</h2>
         <app-bets-games [games]="filter(bets, 'first-round')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
@@ -30,5 +26,9 @@
     <mat-tab label="Finale">
         <h2 class="center-align">Finale</h2>
         <app-bets-games [games]="filter(bets, 'final')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+    </mat-tab>
+    <mat-tab label="Weltmeister">
+        <h2 class="center-align">Weltmeister</h2>
+        <app-bets-world-champion [isAdmin]="isAdmin" [isOther]="isOther" [username]="username"></app-bets-world-champion>
     </mat-tab>
 </mat-tab-group>
