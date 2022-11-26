@@ -1,8 +1,27 @@
 <div class="leaderboard">
     <h2>Rangliste</h2>
-    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser, 'pointer': !player.isCurrentUser }" (click)="openDetail(player.isCurrentUser, player.username)">
+    <mat-card [ngClass]="{ 'current-game': leaderboard[0].currentGame.length > 0, 'header': true }">
+        <div class="right-align">#</div>
+        <div>Spieler</div>
+        <div class="right-align">0er</div>
+        <div class="right-align">3er</div>
+        <div class="right-align">4er</div>
+        <div class="right-align">5er</div>
+        <div *ngIf="leaderboard[0].currentGame.length > 0" class="center-align">
+            <span [class]="'flag-icon flag-icon-' + countryToIso2Code(leaderboard[0].currentGame[2])"></span>
+            :
+            <span [class]="'flag-icon flag-icon-' + countryToIso2Code(leaderboard[0].currentGame[3])"></span>
+        </div>
+        <div class="right-align bold">Pts.</div>
+    </mat-card>
+    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser, 'pointer': !player.isCurrentUser, 'current-game': player.currentGame.length > 0 }" (click)="openDetail(player.isCurrentUser, player.username)">
         <div class="right-align">{{ player.position }}.</div>
         <div>{{ player.username }}</div>
-        <div class="right-align">{{ player.points }}</div>
+        <div class="right-align">{{ player.points0 }}</div>
+        <div class="right-align">{{ player.points3 }}</div>
+        <div class="right-align">{{ player.points4 }}</div>
+        <div class="right-align">{{ player.points5 }}</div>
+        <div *ngIf="player.currentGame.length > 0" class="center-align">{{ player.currentGame[0] }} : {{ player.currentGame[1] }}</div>
+        <div class="right-align bold">{{ player.points }}</div>
     </mat-card>
 </div>

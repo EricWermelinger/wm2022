@@ -154,16 +154,34 @@ router.get('/leaderboard', authenticate, async (req, res) => {
         const allUsers = await userModel.find();
         const leaderboard = allUsers.map(user => {
             const username = user.username;
-            const gamePoints = user.bets.map(bet => {
-                if (bet.date < getNewDateEuropeTimeZone()) {
-                    return calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2);
-                }
-                return 0;
-            }).reduce((a, b) => a + b, 0);
+            const pointsPerGame = user.bets.map(bet => {
+                const gameStarted = bet.date < getNewDateEuropeTimeZone();
+                const gameEnded = addMinutes(bet.date, 140) < getNewDateEuropeTimeZone();
+                const points =  gameStarted ? calculatePoints(bet.score1, bet.score2, bet.real1, bet.real2) : null;
+                return {
+                    points0: points === 0 ? 1 : 0,
+                    points3: points === 3 ? 1 : 0,
+                    points4: points === 4 ? 1 : 0,
+                    points5: points === 5 ? 1 : 0,
+                    points: points ?? 0,
+                    currentGame: gameStarted && !gameEnded ? [bet.score1, bet.score2, bet.team1, bet.team2] : [],
+                };
+            });
+            const gamePoints = pointsPerGame.reduce((a, b) => {
+                return {
+                    points0: a.points0 + b.points0,
+                    points3: a.points3 + b.points3,
+                    points4: a.points4 + b.points4,
+                    points5: a.points5 + b.points5,
+                    points: a.points + b.points,
+                    currentGame: [...a.currentGame, ...b.currentGame],
+                };
+            });
             const worldChampionPoints = user.worldChampion === user.realWorldChampion && user.realWorldChampion !== '' ? process.env.POINTS_WORLD_CHAMPION : 0;
             return {
                 username,
-                points: parseInt(gamePoints) + parseInt(worldChampionPoints),
+                ...gamePoints,
+                points: gamePoints.points + worldChampionPoints,
             }
         }).sort((a, b) => {
             if (a.points === b.points) {

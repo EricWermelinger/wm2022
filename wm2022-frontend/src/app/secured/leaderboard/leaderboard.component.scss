@@ -7,10 +7,17 @@
     justify-items: center;
     mat-card {
         display: grid;
-        grid-template-columns: 20px 160px 80px;
+        grid-template-columns: 20px 120px 20px 20px 20px 20px 40px;
         gap: 16px;
-        width: 292px;
+        width: 388px;
     }
+    mat-card.current-game {
+        grid-template-columns: 20px 120px 20px 20px 20px 20px 60px 40px;
+        width: 444px;
+    }
+}
+.header {
+    background-color: #f5f5f5;
 }
 .current-user {
     background-color: #e0e0e0;

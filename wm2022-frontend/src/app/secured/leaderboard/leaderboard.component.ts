@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Leaderboard } from 'src/app/dto/leaderboard';
+import { countryToIso2Code } from '../bets/bet-game/bet-game.component';
 import { BetsComponent } from '../bets/bets.component';
 
 @Component({
@@ -23,5 +24,9 @@ export class LeaderboardComponent {
     this.dialog.open(BetsComponent, {
       data: username,
     });
+  }
+
+  countryToIso2Code(country: string) {
+    return countryToIso2Code(country);
   }
 }
