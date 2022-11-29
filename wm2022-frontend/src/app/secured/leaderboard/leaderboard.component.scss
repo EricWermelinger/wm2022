@@ -15,6 +15,10 @@
         grid-template-columns: 20px 120px 20px 20px 20px 20px 60px 40px;
         width: 444px;
     }
+    mat-card.current-game.two-current-games {
+        grid-template-columns: 20px 120px 20px 20px 20px 20px 60px 60px 40px;
+        width: 504px;
+    }
 }
 .header {
     background-color: #f5f5f5;

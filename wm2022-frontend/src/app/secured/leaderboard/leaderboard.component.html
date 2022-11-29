@@ -1,6 +1,6 @@
 <div class="leaderboard">
     <h2>Rangliste</h2>
-    <mat-card [ngClass]="{ 'current-game': leaderboard[0].currentGame.length > 0, 'header': true }">
+    <mat-card [ngClass]="{ 'current-game': leaderboard[0].currentGame.length > 0, 'two-current-games': leaderboard[0].currentGame.length > 4, 'header': true }">
         <div class="right-align">#</div>
         <div>Spieler</div>
         <div class="right-align">0er</div>
@@ -12,9 +12,14 @@
             :
             <span [class]="'flag-icon flag-icon-' + countryToIso2Code(leaderboard[0].currentGame[3])"></span>
         </div>
+        <div *ngIf="leaderboard[0].currentGame.length > 4" class="center-align">
+            <span [class]="'flag-icon flag-icon-' + countryToIso2Code(leaderboard[0].currentGame[6])"></span>
+            :
+            <span [class]="'flag-icon flag-icon-' + countryToIso2Code(leaderboard[0].currentGame[7])"></span>
+        </div>
         <div class="right-align bold">Pts.</div>
     </mat-card>
-    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser, 'pointer': !player.isCurrentUser, 'current-game': player.currentGame.length > 0 }" (click)="openDetail(player.isCurrentUser, player.username)">
+    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser, 'two-current-games': leaderboard[0].currentGame.length > 4, 'pointer': !player.isCurrentUser, 'current-game': player.currentGame.length > 0 }" (click)="openDetail(player.isCurrentUser, player.username)">
         <div class="right-align">{{ player.position }}.</div>
         <div>{{ player.username }}</div>
         <div class="right-align">{{ player.points0 }}</div>
@@ -22,6 +27,7 @@
         <div class="right-align">{{ player.points4 }}</div>
         <div class="right-align">{{ player.points5 }}</div>
         <div *ngIf="player.currentGame.length > 0" class="center-align">{{ player.currentGame[0] }} : {{ player.currentGame[1] }}</div>
+        <div *ngIf="player.currentGame.length > 4" class="center-align">{{ player.currentGame[4] }} : {{ player.currentGame[5] }}</div>
         <div class="right-align bold">{{ player.points }}</div>
     </mat-card>
 </div>

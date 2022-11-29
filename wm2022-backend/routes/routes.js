@@ -167,7 +167,15 @@ router.get('/leaderboard', authenticate, async (req, res) => {
                     currentGame: gameStarted && !gameEnded ? [bet.score1, bet.score2, bet.team1, bet.team2] : [],
                 };
             });
-            const gamePoints = pointsPerGame.reduce((a, b) => {
+            const gamePoints = pointsPerGame.sort((a, b) => {
+                if (a.id < b.id) {
+                    return -1;
+                }
+                if (a.id > b.id) {
+                    return 1;
+                }
+                return 0;
+            }).reduce((a, b) => {
                 return {
                     points0: a.points0 + b.points0,
                     points3: a.points3 + b.points3,
