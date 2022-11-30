@@ -1,4 +1,9 @@
 <div *ngIf="(!init || games.length > 0); else noGames" class="games">
+    <mat-card *ngIf="isKORound && !isOther && !isAdmin" class="card">
+        <h3 class="center-align">Info</h3>
+        <mat-divider></mat-divider>
+        <div class="center-align info-text">In der K.O. Phase entscheidet der Spielstand nach 90. Minuten ohne Verlängerung oder Elfmeterschiessen.</div>
+    </mat-card>
     <app-bet-game *ngFor="let bet of games" [bet]="bet" [isAdmin]="isAdmin" [isOther]="isOther"></app-bet-game>
 </div>
 <ng-template #noGames>

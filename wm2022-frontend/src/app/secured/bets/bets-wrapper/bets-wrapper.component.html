@@ -13,19 +13,19 @@
     </mat-tab>
     <mat-tab label="Achtelfinale">
         <h2 class="center-align">Achtelfinale</h2>
-        <app-bets-games [games]="filter(bets, 'eighth-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+        <app-bets-games [games]="filter(bets, 'eighth-finals')" [isAdmin]="isAdmin" [isOther]="isOther" [isKORound]="true"></app-bets-games>
     </mat-tab>
     <mat-tab label="Viertelfinale">
         <h2 class="center-align">Viertelfinale</h2>
-        <app-bets-games [games]="filter(bets, 'quarter-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+        <app-bets-games [games]="filter(bets, 'quarter-finals')" [isAdmin]="isAdmin" [isOther]="isOther" [isKORound]="true"></app-bets-games>
     </mat-tab>
     <mat-tab label="Halbfinale">
         <h2 class="center-align">Halbfinale</h2>
-        <app-bets-games [games]="filter(bets, 'semi-finals')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+        <app-bets-games [games]="filter(bets, 'semi-finals')" [isAdmin]="isAdmin" [isOther]="isOther" [isKORound]="true"></app-bets-games>
     </mat-tab>
     <mat-tab label="Finale">
         <h2 class="center-align">Finale</h2>
-        <app-bets-games [games]="filter(bets, 'final')" [isAdmin]="isAdmin" [isOther]="isOther"></app-bets-games>
+        <app-bets-games [games]="filter(bets, 'final')" [isAdmin]="isAdmin" [isOther]="isOther" [isKORound]="true"></app-bets-games>
     </mat-tab>
     <mat-tab label="Weltmeister">
         <h2 class="center-align">Weltmeister</h2>
