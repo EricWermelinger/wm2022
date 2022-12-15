@@ -19,7 +19,9 @@
         </div>
         <div class="right-align bold">Pts.</div>
     </mat-card>
-    <mat-card *ngFor="let player of leaderboard" [ngClass]="{ 'current-user': player.isCurrentUser, 'two-current-games': leaderboard[0].currentGame.length > 4, 'pointer': !player.isCurrentUser, 'current-game': player.currentGame.length > 0 }" (click)="openDetail(player.isCurrentUser, player.username)">
+    <mat-card *ngFor="let player of leaderboard"
+        [ngClass]="{ 'current-user': player.isCurrentUser, 'two-current-games': leaderboard[0].currentGame.length > 4, 'pointer': !player.isCurrentUser, 'current-game': player.currentGame.length > 0, 'first-place': player.position === 1, 'second-place': player.position === 2, 'third-place': player.position === 3 }"
+        (click)="openDetail(player.isCurrentUser, player.username)">
         <div class="right-align">{{ player.position }}.</div>
         <div>{{ player.username }}</div>
         <div class="right-align">{{ player.points0 }}</div>
