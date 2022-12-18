@@ -189,7 +189,7 @@ router.get('/leaderboard', authenticate, async (req, res) => {
             return {
                 username,
                 ...gamePoints,
-                points: gamePoints.points + worldChampionPoints,
+                points: gamePoints.points + parseInt(worldChampionPoints),
             }
         }).sort((a, b) => {
             if (a.points === b.points) {
